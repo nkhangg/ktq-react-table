@@ -4,6 +4,9 @@ export const defaultPrefixShort = 'order_by_';
 export const defaultPathToData = 'data';
 export const flowShort: TShort[] = ['desc', 'asc'];
 export const defaultKeyPerpage = 'per_page';
+export const defaultKeyPage = 'page';
+
+export const defaultPerpageValue = '10';
 
 export const getParamsData = <R extends Record<string, string | number>>(options: { prefixShort?: string; columns: IColumn<R>[] }) => {
     const paramsUrl = new URLSearchParams(window.location.search);
@@ -33,7 +36,7 @@ export const getParamsData = <R extends Record<string, string | number>>(options
         });
 
     const filterParamsData = pramsKeys
-        .filter((item) => options.columns.map((col) => col.key).includes(item as IColumn<R>['key']))
+        // .filter((item) => options.columns.map((col) => col.key).includes(item as IColumn<R>['key']))
         .map((item) => ({ key: item, type: paramObject[item] } as ITableFilter<R>));
 
     const shortObject = shortParamsData[0] ? { [`${prefixShort}${shortParamsData[0].key}`]: String(shortParamsData[0].type) } : {};

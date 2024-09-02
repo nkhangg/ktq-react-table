@@ -88,7 +88,7 @@ const columns: IColumn<Root>[] = [
 ];
 
 const App = () => {
-    const [data, setData] = useState<{ data: Root[] }>({ data: [] });
+    const [data, setData] = useState<{ data: Root[]; [key: string]: any }>({ data: [] });
     const [loading, setLoading] = useState(false);
 
     const refTableFn: TRefTableFn<Root> = useRef({});
@@ -100,7 +100,7 @@ const App = () => {
             url: 'https://payout.nswteam.net/api/v1/admin/orders',
             headers: {
                 Authorization:
-                    'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjUxMjQ3NzAsImV4cCI6MTcyNTIxMTE3MCwibmJmIjoxNzI1MTI0NzcwLCJqdGkiOiJ0VEN5RWs5Wk52ZU9aZk90Iiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.FW_yP7Jg9AZQOE-JS13DFW10hYO2IJmSAVBXVYd7Riw',
+                    'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjUyNTM0NjksImV4cCI6MTcyNTMzOTg2OSwibmJmIjoxNzI1MjUzNDY5LCJqdGkiOiJZd2xTTEhRekVBdDc4dnVUIiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.0Uu9lxOhBXziKwb1aYPoG7YwXF5fF9nX8MvZZsaZadI',
             },
             params,
         });
@@ -132,9 +132,20 @@ const App = () => {
                             path: 'https://payout.nswteam.net/api/v1/admin/orders',
                             headers: {
                                 Authorization:
-                                    'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjUxMjQ3NzAsImV4cCI6MTcyNTIxMTE3MCwibmJmIjoxNzI1MTI0NzcwLCJqdGkiOiJ0VEN5RWs5Wk52ZU9aZk90Iiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.FW_yP7Jg9AZQOE-JS13DFW10hYO2IJmSAVBXVYd7Riw',
+                                    'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjUyNTM0NjksImV4cCI6MTcyNTMzOTg2OSwibmJmIjoxNzI1MjUzNDY5LCJqdGkiOiJZd2xTTEhRekVBdDc4dnVUIiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.0Uu9lxOhBXziKwb1aYPoG7YwXF5fF9nX8MvZZsaZadI',
                             },
                             pathToData: 'data.data',
+                            perPage: data['per_page'],
+                            lastPage: data['last_page'],
+                            to: data['to'],
+                            from: data['from'],
+                            total: data['total'],
+                            keyOptions: {
+                                to: 'to',
+                                from: 'from',
+                                total: 'total',
+                                last_page: 'lastPage',
+                            },
                         }}
                         refTableFn={refTableFn}
                         showLoading={loading}
@@ -144,6 +155,9 @@ const App = () => {
                         columns={columns}
                         rows={data.data}
                         onFilter={(data) => {
+                            console.log(data);
+                        }}
+                        onShort={(data) => {
                             console.log(data);
                         }}
                         actions={{

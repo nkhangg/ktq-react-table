@@ -60,7 +60,9 @@ export interface IOptions {
     total?: number;
     prefixShort?: string;
     pathToData?: string; // 'data.data' default 'data'
+    pathToOption?: string;
     headers?: { [key: string]: string };
+    keyOptions?: { [key: string]: 'to' | 'from' | 'total' | 'lastPage' };
 }
 
 export interface IDataFilter {
@@ -114,4 +116,9 @@ export interface IFilterItemProps {
         perpageProps?: SelectProps;
         key?: string;
     };
+    pagination?: {
+        show?: boolean;
+        key?: string;
+    };
+    description?: (option: IOptions) => ReactNode;
 }

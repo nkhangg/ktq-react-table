@@ -89,6 +89,8 @@ const Table = <R extends Record<string, string | number>>({
 
     const [loading, setLoading] = useState(showLoading || false);
 
+    const [optionPagiantion, setOptionPagiantion] = useState(options);
+
     const renderStyleHead = useCallback(
         (styleHead: IColumnStyle) => {
             switch (styleHead?.type) {
@@ -115,7 +117,7 @@ const Table = <R extends Record<string, string | number>>({
         [th],
     );
 
-    function getValueFromPath(obj: AxiosResponse<R[]>, path: string): R[] {
+    function getValueFromPath(obj: AxiosResponse<R[]>, path: string): any {
         // Tách chuỗi path thành các phần bằng dấu '.'
         const keys = path.split('.');
 
@@ -134,11 +136,41 @@ const Table = <R extends Record<string, string | number>>({
         }, obj);
     }
 
+    const getOptionsFromReponse = useCallback(
+        (response: AxiosResponse<R[]>) => {
+            if (!options) return;
+
+            const values = getValueFromPath(response, options.pathToOption || defaultPathToData);
+
+            const optionsKeys: { [key: string]: string } = options.keyOptions || {
+                to: 'to',
+                from: 'form',
+                total: 'total',
+                lastPage: 'lastPage',
+            };
+
+            const resutl = Object.keys(values)
+                .filter((item) => Object.keys(optionsKeys).includes(item))
+                .reduce((prev, cur) => {
+                    prev[optionsKeys[cur]] = values[cur];
+
+                    return prev;
+                }, {} as { [key: string]: string | number });
+
+            return resutl;
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [options],
+    );
+
     const fetchData = useCallback(
         async (shortData: ITableShort<R> | null, filter?: ITableFilter<R>[] | null) => {
             if (!options?.path) return;
 
+            console.log('shortData', shortData);
             const { params } = renderFilter(shortData, filter);
+
+            console.log('params', params);
 
             try {
                 if (onAfterFetch) onAfterFetch();
@@ -157,6 +189,14 @@ const Table = <R extends Record<string, string | number>>({
                 }
 
                 const data = getValueFromPath(response, options.pathToData || defaultPathToData);
+
+                const optionPased = getOptionsFromReponse(response);
+
+                if (options) {
+                    setOptionPagiantion({ ...options, ...optionPased });
+                } else {
+                    setOptionPagiantion({ ...(optionPased as unknown as IOptions) });
+                }
 
                 if (Array.isArray(data)) {
                     requestIdleCallback(
@@ -177,7 +217,7 @@ const Table = <R extends Record<string, string | number>>({
             }
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [options?.path, filter],
+        [options?.path, filter, getOptionsFromReponse],
     );
 
     const fetchWithShort = useCallback(
@@ -195,24 +235,29 @@ const Table = <R extends Record<string, string | number>>({
                 if (loading) return;
 
                 if (!short) {
+                    console.log('1');
                     fetchWithShort({ key: col.key, type: flowShort[0] });
 
-                    if (onShort) onShort(short);
+                    if (onShort) onShort({ key: col.key, type: flowShort[0] });
 
                     return;
                 }
 
                 if (short.type === 'desc') {
+                    console.log('2');
                     fetchWithShort({ key: col.key, type: flowShort[1] });
+                    if (onShort) onShort({ key: col.key, type: flowShort[1] });
+
                     return;
                 }
 
                 if (short.type === 'asc') {
+                    console.log('3');
                     fetchWithShort(null);
+                    if (onShort) onShort(null);
+
                     return;
                 }
-
-                if (onShort) onShort(short);
             };
 
             const DefaultIcon = () => {
@@ -289,7 +334,7 @@ const Table = <R extends Record<string, string | number>>({
         });
 
         paramsUrl.forEach((_, key) => {
-            const item = dataFilter.find((item) => key === item.key);
+            const item = dataFilter.find((item) => key == item.key);
 
             if (!item) paramsUrl.delete(key);
         });
@@ -303,16 +348,26 @@ const Table = <R extends Record<string, string | number>>({
 
     const renderFilter = useCallback(
         (short: ITableShort<R> | ITableFilter<R> | null, filterData?: ITableFilter<R>[] | null) => {
-            const dataFilter: IDataFilter[] = [...(filterData ? (filterData as IDataFilter[]) : (filter as IDataFilter[]))];
+            let dataFilter: IDataFilter[] = [...(filterData ? (filterData as IDataFilter[]) : (filter as IDataFilter[]))];
             const params: { [key: string]: string } = {};
 
             if (short) {
+                const shortItem = dataFilter.find((item) => item.key.includes(options?.prefixShort || defaultPrefixShort));
+
+                if (shortItem) {
+                    dataFilter = dataFilter.filter((item) => !item.key.includes(options?.prefixShort || defaultPrefixShort));
+                }
+
                 dataFilter.push({ key: `${options?.prefixShort || defaultPrefixShort}${short.key}`, type: String(short.type) });
+            } else {
+                dataFilter = dataFilter.filter((item) => !item.key.includes(options?.prefixShort || defaultPrefixShort));
             }
 
             dataFilter.forEach((filter) => {
                 params[filter.key] = String(filter.type);
             });
+
+            console.log(dataFilter);
 
             renderParamsUrl(dataFilter);
 
@@ -322,7 +377,7 @@ const Table = <R extends Record<string, string | number>>({
             };
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [options?.prefixShort, paramsUrl],
+        [filter, options?.prefixShort, paramsUrl],
     );
 
     const getParamsData = (paramObject: { [key: string]: string | number }) => {
@@ -343,7 +398,7 @@ const Table = <R extends Record<string, string | number>>({
             });
 
         const filterParamsData = pramsKeys
-            .filter((item) => columns.map((col) => col.key).includes(item as IColumn<R>['key']))
+            // .filter((item) => columns.map((col) => col.key).includes(item as IColumn<R>['key']))
             .map((item) => ({ key: item, type: paramObject[item] } as ITableFilter<R>));
 
         return { shortParamsData, filterParamsData };
@@ -388,6 +443,12 @@ const Table = <R extends Record<string, string | number>>({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    useEffect(() => {
+        if (!options) return;
+
+        setOptionPagiantion(options);
+    }, [options]);
+
     // useImperativeHandle space
     useImperativeHandle(
         refTableFn,
@@ -418,6 +479,7 @@ const Table = <R extends Record<string, string | number>>({
                         }
                     }}
                     columns={columns}
+                    optionsTable={optionPagiantion}
                     {...filterProps}
                 />
             )}
