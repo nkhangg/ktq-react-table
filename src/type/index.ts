@@ -15,6 +15,7 @@ import {
     TextInputProps,
 } from '@mantine/core';
 import { DateInputProps, DateInputStylesNames, DateTimePickerProps, DateTimePickerStylesNames } from '@mantine/dates';
+import { AxiosResponse } from 'axios';
 import React, { ReactNode } from 'react';
 export type TShort = 'asc' | 'desc' | 'clear';
 
@@ -50,11 +51,13 @@ export interface TableChildProps {
     td?: TableTdProps;
 }
 
-export interface IOptions {
+export interface IOptions<R extends Record<string, string | number>> {
     currentPage?: number;
     from?: number | null;
     lastPage?: number;
-    path: string;
+    // path: string;
+    query?: (params: Record<string, string | number>) => Promise<AxiosResponse<R[], any>>;
+    method?: 'POST' | 'GET';
     perPage?: number;
     to?: number | null;
     total?: number;
@@ -80,7 +83,7 @@ export interface ITableFilter<R extends Record<string, string | number>> {
     key: IColumn<R>['key'];
 }
 
-export interface IFilterItemProps {
+export interface IFilterItemProps<R extends Record<string, string | number>> {
     select?: MantineComponent<{
         props: SelectProps;
         ref: HTMLInputElement;
@@ -120,5 +123,5 @@ export interface IFilterItemProps {
         show?: boolean;
         key?: string;
     };
-    description?: (option: IOptions) => ReactNode;
+    description?: (option: IOptions<R>) => ReactNode;
 }

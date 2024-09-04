@@ -11,7 +11,8 @@ export interface IFilterProps<R extends Record<string, string | number>> {
     columns: IColumn<R>[];
     loading?: boolean;
     initFillter?: ITableFilter<R>[];
-    optionsTable?: IOptions;
+    optionsTable?: IOptions<R>;
+    persistFilter?: IDataFilter[];
     onSumit?: (filter: ITableFilter<R>[], options?: IDataFilter[]) => void;
 }
 
@@ -22,9 +23,10 @@ export default function Filter<R extends Record<string, string | number>>({
     perpage = { show: true },
     pagination = { show: true },
     optionsTable,
+    persistFilter,
     onSumit,
     ...props
-}: IFilterProps<R> & IFilterItemProps) {
+}: IFilterProps<R> & IFilterItemProps<R>) {
     const defaultPerpage = optionsTable?.perPage ? optionsTable.perPage : defaultPerpageValue;
     const defaultPage = optionsTable?.currentPage ? optionsTable.currentPage : 1;
 
@@ -97,6 +99,13 @@ export default function Filter<R extends Record<string, string | number>>({
                 } as ITableFilter<R>;
             });
 
+        if (persistFilter && persistFilter?.length) {
+            persistFilter.reduce((prev, cur) => {
+                prev[cur.key] = cur.type;
+                return prev;
+            }, params);
+        }
+
         form.reset();
         form.setValues(params);
 
@@ -106,8 +115,10 @@ export default function Filter<R extends Record<string, string | number>>({
     };
 
     const ingorKeys = useMemo(() => {
-        return [perpage?.key || defaultKeyPerpage, pagination?.key || defaultKeyPage];
-    }, [perpage?.key, pagination.key]);
+        const persistKeys = persistFilter && persistFilter.length ? persistFilter.map((i) => i.key) : [];
+
+        return [perpage?.key || defaultKeyPerpage, pagination?.key || defaultKeyPage, ...persistKeys];
+    }, [perpage?.key, pagination.key, persistFilter]);
 
     useEffect(() => {
         if (!initFillter) return;
@@ -120,6 +131,15 @@ export default function Filter<R extends Record<string, string | number>>({
         form.setValues(params);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initFillter, optionsTable]);
+
+    useEffect(() => {
+        console.log(optionsTable?.perPage);
+
+        if (!optionsTable?.perPage) return;
+
+        form.setFieldValue(perpage?.key || defaultKeyPerpage, String(optionsTable.perPage));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [optionsTable?.perPage]);
 
     const defaultStyleInput = {
         size: 'xs' as MantineSize,

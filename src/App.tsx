@@ -1,4 +1,4 @@
-import { Box, Tooltip } from '@mantine/core';
+import { Box, Button, Tooltip } from '@mantine/core';
 import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
 import Table from './components/table';
@@ -91,6 +91,11 @@ const App = () => {
     const [data, setData] = useState<{ data: Root[]; [key: string]: any }>({ data: [] });
     const [loading, setLoading] = useState(false);
 
+    const [header, setHeader] = useState({
+        Authorization:
+            'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjU0MzMzNTEsImV4cCI6MTcyNTUxOTc1MSwibmJmIjoxNzI1NDMzMzUxLCJqdGkiOiJJUVFuSGE5RlRCQ1J3cEhlIiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.Sj8fIfexoenKFHgeIYAG4T1BkoJDrApXvMfND_b7fEM',
+    });
+
     const refTableFn: TRefTableFn<Root> = useRef({});
     const getData = async () => {
         const { params } = getParamsData({ columns });
@@ -100,7 +105,7 @@ const App = () => {
             url: 'https://payout.nswteam.net/api/v1/admin/orders',
             headers: {
                 Authorization:
-                    'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjUyNTM0NjksImV4cCI6MTcyNTMzOTg2OSwibmJmIjoxNzI1MjUzNDY5LCJqdGkiOiJZd2xTTEhRekVBdDc4dnVUIiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.0Uu9lxOhBXziKwb1aYPoG7YwXF5fF9nX8MvZZsaZadI',
+                    'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjU0MzMzNTEsImV4cCI6MTcyNTUxOTc1MSwibmJmIjoxNzI1NDMzMzUxLCJqdGkiOiJJUVFuSGE5RlRCQ1J3cEhlIiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.Sj8fIfexoenKFHgeIYAG4T1BkoJDrApXvMfND_b7fEM',
             },
             params,
         });
@@ -110,6 +115,17 @@ const App = () => {
         setLoading(false);
     };
 
+    const getDataTable = (params: Record<string, string | number>) => {
+        return axios({
+            url: 'https://payout.nswteam.net/api/v1/admin/orders',
+            headers: {
+                Authorization:
+                    'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjU0MzMzNTEsImV4cCI6MTcyNTUxOTc1MSwibmJmIjoxNzI1NDMzMzUxLCJqdGkiOiJJUVFuSGE5RlRCQ1J3cEhlIiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.Sj8fIfexoenKFHgeIYAG4T1BkoJDrApXvMfND_b7fEM',
+            },
+            params,
+        });
+    };
+
     useEffect(() => {
         getData();
     }, []);
@@ -117,6 +133,7 @@ const App = () => {
     return (
         <Box ta={'center'}>
             <h1 className="text-3xl  font-bold underline">Customer Table</h1>
+            <Button onClick={() => setHeader({ Authorization: '' })}>Click me</Button>
             <Box
                 style={{
                     padding: '40px',
@@ -129,10 +146,9 @@ const App = () => {
                 >
                     <Table
                         options={{
-                            path: 'https://payout.nswteam.net/api/v1/admin/orders',
+                            query: getDataTable,
                             headers: {
-                                Authorization:
-                                    'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjUyNTM0NjksImV4cCI6MTcyNTMzOTg2OSwibmJmIjoxNzI1MjUzNDY5LCJqdGkiOiJZd2xTTEhRekVBdDc4dnVUIiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.0Uu9lxOhBXziKwb1aYPoG7YwXF5fF9nX8MvZZsaZadI',
+                                ...header,
                             },
                             pathToData: 'data.data',
                             perPage: data['per_page'],
@@ -160,6 +176,12 @@ const App = () => {
                         onShort={(data) => {
                             console.log(data);
                         }}
+                        persistFilter={[
+                            {
+                                key: 'time_zone',
+                                type: 'Asian',
+                            },
+                        ]}
                         actions={{
                             title: <span>Action</span>,
                             body(row) {

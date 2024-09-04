@@ -2,7 +2,7 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { faArrowDownAZ, faArrowsUpDown, faArrowUpAZ } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Box, MantineStyleProp, Table as MTable, TableProps as MTableProps, Tooltip } from '@mantine/core';
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import React, { ReactNode, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useState } from 'react';
 import { IColumn, IColumnStyle, IDataFilter, IFilterItemProps, IOptions, ITableFilter, ITableShort, TableChildProps, TRefTableFn, TShort } from '../type';
 import { defaultPathToData, defaultPrefixShort, flowShort } from '../ultils';
@@ -16,16 +16,17 @@ interface TableProps<R extends Record<string, string | number>> extends MTablePr
     iconUp?: ReactNode;
     iconNormal?: ReactNode;
     iconDown?: ReactNode;
-    options?: IOptions;
+    options?: IOptions<R>;
     disableAutoShort?: boolean;
     emptyDataTemplate?: ReactNode;
     loadingTemplate?: ReactNode;
+    persistFilter?: IDataFilter[];
     showLoading?: boolean;
     addToHistoryBrowserWhenFillter?: boolean;
     autoCallWithParams?: boolean;
     showFilter?: boolean;
     refTableFn?: TRefTableFn<R>;
-    filterProps?: IFilterItemProps;
+    filterProps?: IFilterItemProps<R>;
     actions?: {
         title?: string | ReactNode;
         body: (row: R) => ReactNode;
@@ -69,6 +70,7 @@ const Table = <R extends Record<string, string | number>>({
     showFilter = true,
     refTableFn,
     filterProps,
+    persistFilter,
     actions,
     onShort,
     onAfterFetch,
@@ -165,9 +167,8 @@ const Table = <R extends Record<string, string | number>>({
 
     const fetchData = useCallback(
         async (shortData: ITableShort<R> | null, filter?: ITableFilter<R>[] | null) => {
-            if (!options?.path) return;
+            if (!options?.query) return;
 
-            console.log('shortData', shortData);
             const { params } = renderFilter(shortData, filter);
 
             console.log('params', params);
@@ -176,12 +177,8 @@ const Table = <R extends Record<string, string | number>>({
                 if (onAfterFetch) onAfterFetch();
 
                 setLoading(true);
-                const response = await axios<R[]>({
-                    headers: options.headers,
-                    method: 'GET',
-                    url: options.path,
-                    params,
-                });
+
+                const response = await (options && options.query && options.query(params));
 
                 if (!response) {
                     console.warn('Response is error. Please check');
@@ -195,7 +192,7 @@ const Table = <R extends Record<string, string | number>>({
                 if (options) {
                     setOptionPagiantion({ ...options, ...optionPased });
                 } else {
-                    setOptionPagiantion({ ...(optionPased as unknown as IOptions) });
+                    setOptionPagiantion({ ...(optionPased as unknown as IOptions<R>) });
                 }
 
                 if (Array.isArray(data)) {
@@ -217,7 +214,7 @@ const Table = <R extends Record<string, string | number>>({
             }
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [options?.path, filter, getOptionsFromReponse],
+        [options?.query, filter, getOptionsFromReponse],
     );
 
     const fetchWithShort = useCallback(
@@ -406,13 +403,13 @@ const Table = <R extends Record<string, string | number>>({
 
     // use effect space
     useEffect(() => {
-        if (options?.path || disableAutoShort) return;
+        if (options?.query || disableAutoShort) return;
 
         const data = sortData<R>(rowsData, short);
 
         setRowsData([...data]);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [options?.path, short]);
+    }, [options?.query, short]);
 
     useEffect(() => {
         setRowsData([...rows]);
@@ -449,6 +446,12 @@ const Table = <R extends Record<string, string | number>>({
         setOptionPagiantion(options);
     }, [options]);
 
+    useEffect(() => {
+        if (!persistFilter?.length) return;
+
+        setFilter(persistFilter as ITableFilter<R>[]);
+    }, [persistFilter]);
+
     // useImperativeHandle space
     useImperativeHandle(
         refTableFn,
@@ -467,6 +470,7 @@ const Table = <R extends Record<string, string | number>>({
         <>
             {showFilter && (
                 <Filter
+                    persistFilter={persistFilter}
                     loading={loading}
                     initFillter={[...filter]}
                     onSumit={(data) => {
