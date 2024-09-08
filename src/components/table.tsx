@@ -1,16 +1,21 @@
+'use client';
+
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
+import '../index.css';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { faArrowDownAZ, faArrowsUpDown, faArrowUpAZ } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Box, MantineStyleProp, Table as MTable, TableProps as MTableProps, Tooltip } from '@mantine/core';
 import { AxiosError, AxiosResponse } from 'axios';
 import React, { ReactNode, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useState } from 'react';
-import { IColumn, IColumnStyle, IDataFilter, IFilterItemProps, IOptions, ITableFilter, ITableShort, TableChildProps, TRefTableFn, TShort } from '../type';
-import { defaultPathToData, defaultPrefixShort, flowShort } from '../ultils';
+import { IColumn, IColumnStyle, IDataFilter, IFilterItemProps, IOptions, ITableFilter, ITableShort, TableChildProps, TKeyPagiantion, TRefTableFn, TShort } from '../type';
+import { defaultPathToData, defaultPrefixShort, flowShort, getParamsData as getParamsFromURL } from '../ultils';
 import Filter from './filter';
 
 interface TableProps<R extends Record<string, string | number>> extends MTableProps {
     columns: IColumn<R>[];
-    rows: R[];
+    rows?: R[];
     rowKey: Extract<keyof R, string>;
     tableChildProps?: TableChildProps;
     iconUp?: ReactNode;
@@ -57,7 +62,7 @@ const TableIcon = ({ children, lable, icon, onClick }: { children?: ReactNode; i
 
 const Table = <R extends Record<string, string | number>>({
     columns,
-    rows,
+    rows = [],
     rowKey,
     tableChildProps = {},
     options,
@@ -144,11 +149,12 @@ const Table = <R extends Record<string, string | number>>({
 
             const values = getValueFromPath(response, options.pathToOption || defaultPathToData);
 
-            const optionsKeys: { [key: string]: string } = options.keyOptions || {
+            const optionsKeys: TKeyPagiantion = options.keyOptions || {
                 to: 'to',
-                from: 'form',
+                from: 'from',
                 total: 'total',
                 lastPage: 'lastPage',
+                perPage: 'perPage',
             };
 
             const resutl = Object.keys(values)
@@ -348,7 +354,7 @@ const Table = <R extends Record<string, string | number>>({
             let dataFilter: IDataFilter[] = [...(filterData ? (filterData as IDataFilter[]) : (filter as IDataFilter[]))];
             const params: { [key: string]: string } = {};
 
-            if (short) {
+            if (short && Object.keys(short).length > 0) {
                 const shortItem = dataFilter.find((item) => item.key.includes(options?.prefixShort || defaultPrefixShort));
 
                 if (shortItem) {
@@ -412,6 +418,8 @@ const Table = <R extends Record<string, string | number>>({
     }, [options?.query, short]);
 
     useEffect(() => {
+        if (rows.length <= 0) return;
+
         setRowsData([...rows]);
     }, [rows]);
 
@@ -465,6 +473,24 @@ const Table = <R extends Record<string, string | number>>({
         },
         [filter, loading, fetchData],
     );
+
+    useEffect(() => {
+        if (!options?.query) return;
+
+        const { filterParamsData, shortParamsData } = getParamsFromURL({ columns, prefixShort: options.prefixShort });
+
+        if (filterParamsData && filterParamsData.length > 0) {
+            setFilter(filterParamsData as ITableFilter<R>[]);
+        }
+
+        if (shortParamsData && Object.keys(shortParamsData).length > 0) {
+            setShort(shortParamsData as ITableShort<R>);
+        }
+
+        console.log(shortParamsData);
+
+        fetchData((shortParamsData as ITableShort<R>) || null, filterParamsData);
+    }, [options]);
 
     return (
         <>

@@ -1,9 +1,12 @@
 'use client';
 import { Box, Button, MantineSize, MantineStyleProp, NumberInput, Pagination, Select, TextInput } from '@mantine/core';
+import '@mantine/core/styles.css';
 import { DateInput, DateTimePicker } from '@mantine/dates';
+import '@mantine/dates/styles.css';
 import { useForm } from '@mantine/form';
 import { IconFilterExclamation, IconFilterSearch } from '@tabler/icons-react';
 import { useEffect, useMemo, useState } from 'react';
+import '../index.css';
 import { IColumn, IDataFilter, IFilterItemProps, IOptions, ITableFilter } from '../type';
 import { defaultKeyPage, defaultKeyPerpage, defaultPerpageValue, defaultPrefixShort, removeFalsy } from '../ultils';
 
@@ -48,7 +51,7 @@ export default function Filter<R extends Record<string, string | number>>({
 
     const [open, setOpen] = useState(false);
 
-    const [filter, setFilter] = useState<ITableFilter<R>[]>([]);
+    // const [filter, setFilter] = useState<ITableFilter<R>[]>([]);
 
     const handleSubmitFilter = form.onSubmit((data) => {
         const validData = removeFalsy(data);
@@ -60,7 +63,7 @@ export default function Filter<R extends Record<string, string | number>>({
             } as ITableFilter<R>;
         });
 
-        setFilter(tableFilterData);
+        // setFilter(tableFilterData);
 
         // form.setValues({
         //     [pagination?.key || defaultKeyPage]: 1,
@@ -79,7 +82,7 @@ export default function Filter<R extends Record<string, string | number>>({
             } as ITableFilter<R>;
         });
 
-        setFilter(tableFilterData);
+        // setFilter(tableFilterData);
 
         if (onSumit) onSumit(tableFilterData);
     });
@@ -109,7 +112,7 @@ export default function Filter<R extends Record<string, string | number>>({
         form.reset();
         form.setValues(params);
 
-        setFilter(tableFilterData);
+        // setFilter(tableFilterData);
 
         if (onSumit) onSumit(tableFilterData);
     };

@@ -42,6 +42,8 @@ export type IColumn<R extends Record<string, string | number>> = {
     typeFilter?: TTypeFilter;
 };
 
+export type TKeyPagiantion = { [key: string]: 'to' | 'from' | 'total' | 'lastPage' | 'perPage' };
+
 export interface TableChildProps {
     thead?: TableTheadProps;
     trhead?: TableTrProps;
@@ -65,7 +67,7 @@ export interface IOptions<R extends Record<string, string | number>> {
     pathToData?: string; // 'data.data' default 'data'
     pathToOption?: string;
     headers?: { [key: string]: string };
-    keyOptions?: { [key: string]: 'to' | 'from' | 'total' | 'lastPage' };
+    keyOptions?: TKeyPagiantion;
 }
 
 export interface IDataFilter {

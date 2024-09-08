@@ -93,7 +93,7 @@ const App = () => {
 
     const [header, setHeader] = useState({
         Authorization:
-            'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjU0MzMzNTEsImV4cCI6MTcyNTUxOTc1MSwibmJmIjoxNzI1NDMzMzUxLCJqdGkiOiJJUVFuSGE5RlRCQ1J3cEhlIiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.Sj8fIfexoenKFHgeIYAG4T1BkoJDrApXvMfND_b7fEM',
+            'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjU1NTQ1ODUsImV4cCI6MTcyNTY0MDk4NSwibmJmIjoxNzI1NTU0NTg1LCJqdGkiOiJKNkxyWFB0ekdZV2N4TWpGIiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.j9dsZ-6k9lJ5p0PJ04SRraF5ARkbHh5yPR3L2mPeMP4',
     });
 
     const refTableFn: TRefTableFn<Root> = useRef({});
@@ -105,7 +105,7 @@ const App = () => {
             url: 'https://payout.nswteam.net/api/v1/admin/orders',
             headers: {
                 Authorization:
-                    'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjU0MzMzNTEsImV4cCI6MTcyNTUxOTc1MSwibmJmIjoxNzI1NDMzMzUxLCJqdGkiOiJJUVFuSGE5RlRCQ1J3cEhlIiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.Sj8fIfexoenKFHgeIYAG4T1BkoJDrApXvMfND_b7fEM',
+                    'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjU1NTQ1ODUsImV4cCI6MTcyNTY0MDk4NSwibmJmIjoxNzI1NTU0NTg1LCJqdGkiOiJKNkxyWFB0ekdZV2N4TWpGIiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.j9dsZ-6k9lJ5p0PJ04SRraF5ARkbHh5yPR3L2mPeMP4',
             },
             params,
         });
@@ -120,15 +120,54 @@ const App = () => {
             url: 'https://payout.nswteam.net/api/v1/admin/orders',
             headers: {
                 Authorization:
-                    'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjU0MzMzNTEsImV4cCI6MTcyNTUxOTc1MSwibmJmIjoxNzI1NDMzMzUxLCJqdGkiOiJJUVFuSGE5RlRCQ1J3cEhlIiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.Sj8fIfexoenKFHgeIYAG4T1BkoJDrApXvMfND_b7fEM',
+                    'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjU3ODcwNzMsImV4cCI6MTcyNTg3MzQ3MywibmJmIjoxNzI1Nzg3MDczLCJqdGkiOiJCTWY1a3dmQ09kMjN0T3dGIiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.l8_W80W5PbCZbsTNlvCT9LIXqsm6dSVmYJkFGUR8Tzk',
             },
             params,
         });
     };
 
     useEffect(() => {
-        getData();
+        // getData();
     }, []);
+
+    type User = {
+        id: string;
+        name: string;
+        age: number;
+    };
+
+    const userColumns: IColumn<User>[] = [
+        {
+            title: 'ID',
+            key: 'id',
+        },
+        {
+            title: 'Age',
+            key: 'age',
+        },
+        {
+            title: 'Name',
+            key: 'name',
+        },
+    ];
+
+    const rows: User[] = [
+        {
+            age: 18,
+            id: '1',
+            name: 'Khang',
+        },
+        {
+            age: 19,
+            id: '2',
+            name: 'An',
+        },
+        {
+            age: 20,
+            id: '3',
+            name: 'Khang',
+        },
+    ];
 
     return (
         <Box ta={'center'}>
@@ -146,10 +185,7 @@ const App = () => {
                 >
                     <Table
                         options={{
-                            query: getDataTable,
-                            headers: {
-                                ...header,
-                            },
+                            // query: getDataTable,
                             pathToData: 'data.data',
                             perPage: data['per_page'],
                             lastPage: data['last_page'],
@@ -161,15 +197,14 @@ const App = () => {
                                 from: 'from',
                                 total: 'total',
                                 last_page: 'lastPage',
+                                per_page: 'perPage',
                             },
                         }}
-                        refTableFn={refTableFn}
-                        showLoading={loading}
                         tableChildProps={{ th: { style: { textAlign: 'center' } } }}
                         withColumnBorders
                         withTableBorder
-                        columns={columns}
-                        rows={data.data}
+                        columns={userColumns}
+                        rows={rows}
                         onFilter={(data) => {
                             console.log(data);
                         }}
