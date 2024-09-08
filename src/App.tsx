@@ -1,11 +1,10 @@
-import { Box, Button, Modal, Tooltip } from '@mantine/core';
+import { Box, Modal, Tooltip } from '@mantine/core';
 import axios from 'axios';
-import { useEffect, useRef, useState } from 'react';
-import Table from './components/table';
-import { IColumn, TRefTableFn } from './type';
-import { getParamsData } from './ultils';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import Table from './components/table';
+import { KTQTable as Table } from 'ktq-react-table';
+import { IColumn } from 'ktq-react-table/src/type';
 import { faEdit } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useDisclosure } from '@mantine/hooks';
 
 type Root = {
@@ -90,34 +89,7 @@ const columns: IColumn<Root>[] = [
 ];
 
 const App = () => {
-    const [data, setData] = useState<{ data: Root[]; [key: string]: any }>({ data: [] });
     const [opened, { open, close }] = useDisclosure(false);
-
-    const [loading, setLoading] = useState(false);
-
-    const [header, setHeader] = useState({
-        Authorization:
-            'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjU1NTQ1ODUsImV4cCI6MTcyNTY0MDk4NSwibmJmIjoxNzI1NTU0NTg1LCJqdGkiOiJKNkxyWFB0ekdZV2N4TWpGIiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.j9dsZ-6k9lJ5p0PJ04SRraF5ARkbHh5yPR3L2mPeMP4',
-    });
-
-    const refTableFn: TRefTableFn<Root> = useRef({});
-    const getData = async () => {
-        const { params } = getParamsData({ columns });
-
-        setLoading(true);
-        const response = await axios({
-            url: 'https://payout.nswteam.net/api/v1/admin/orders',
-            headers: {
-                Authorization:
-                    'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BheW91dC5uc3d0ZWFtLm5ldC9hcGkvdjEvYWRtaW4vbG9naW4iLCJpYXQiOjE3MjU1NTQ1ODUsImV4cCI6MTcyNTY0MDk4NSwibmJmIjoxNzI1NTU0NTg1LCJqdGkiOiJKNkxyWFB0ekdZV2N4TWpGIiwic3ViIjoiNSIsInBydiI6ImQyZmYyOTMzOWE4YTNlODJjMzU4MmE1YThlNzM5ZGYxNzg5YmIxMmYifQ.j9dsZ-6k9lJ5p0PJ04SRraF5ARkbHh5yPR3L2mPeMP4',
-            },
-            params,
-        });
-
-        setData(response.data);
-
-        setLoading(false);
-    };
 
     const getDataTable = (params: Record<string, string | number>) => {
         return axios({
@@ -130,63 +102,9 @@ const App = () => {
         });
     };
 
-    useEffect(() => {
-        // getData();
-    }, []);
-
-    type User = {
-        id: string;
-        name: string;
-        age: number;
-    };
-
-    const userColumns: IColumn<User>[] = [
-        {
-            title: 'ID',
-            key: 'id',
-        },
-        {
-            title: 'Age',
-            key: 'age',
-        },
-        {
-            title: 'Name',
-            key: 'name',
-        },
-    ];
-
-    const rows: User[] = [
-        {
-            age: 18,
-            id: '1',
-            name: 'Khang',
-        },
-        {
-            age: 19,
-            id: '2',
-            name: 'An',
-        },
-        {
-            age: 20,
-            id: '3',
-            name: 'Khang',
-        },
-        {
-            age: 20,
-            id: '4',
-            name: 'Khang',
-        },
-        {
-            age: 20,
-            id: '5',
-            name: 'Khang',
-        },
-    ];
-
     return (
         <Box ta={'center'}>
-            <h1 className="text-3xl  font-bold underline">Customer Table</h1>
-            <Button onClick={() => setHeader({ Authorization: '' })}>Click me</Button>
+            <h1 className="text-3xl  font-bold underline">Table</h1>
             <Box
                 style={{
                     padding: '40px',
@@ -201,11 +119,7 @@ const App = () => {
                         options={{
                             query: getDataTable,
                             pathToData: 'data.data',
-                            perPage: data['per_page'],
-                            lastPage: data['last_page'],
-                            to: data['to'],
-                            from: data['from'],
-                            total: data['total'],
+
                             keyOptions: {
                                 to: 'to',
                                 from: 'from',
@@ -225,7 +139,6 @@ const App = () => {
                         withColumnBorders
                         withTableBorder
                         columns={columns}
-                        // rows={rows}
                         onFilter={(data) => {
                             console.log(data);
                         }}

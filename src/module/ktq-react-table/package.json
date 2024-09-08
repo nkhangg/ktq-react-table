@@ -1,0 +1,72 @@
+{
+    "name": "ktq-react-table",
+    "version": "1.1.1",
+    "description": "The library auto generate table with filter and sort",
+    "main": "dist/index.js",
+    "module": "dist/index.mjs",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "rollup": "rollup -c --bundleConfigAsCjs",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/nkhangg/ktq-react-table.git"
+    },
+    "keywords": [
+        "react",
+        "react-table",
+        "auto-generate-table",
+        "table-component"
+    ],
+    "author": "khangpn",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/nkhangg/ktq-react-table/issues"
+    },
+    "files": [
+        "dist/index.js",
+        "dist/index.mjs",
+        "dist/index.d.ts",
+        "src",
+        "README.md"
+    ],
+    "homepage": "https://github.com/nkhangg/ktq-react-table#readme",
+    "devDependencies": {
+        "@rollup/plugin-commonjs": "^26.0.1",
+        "@rollup/plugin-node-resolve": "^15.2.3",
+        "@rollup/plugin-terser": "^0.4.4",
+        "@rollup/plugin-typescript": "^11.1.6",
+        "@types/dompurify": "^3.0.5",
+        "@types/react": "^18.3.3",
+        "autoprefixer": "^10.4.20",
+        "css-loader": "^7.1.2",
+        "postcss": "^8.4.45",
+        "postcss-loader": "^8.1.1",
+        "postcss-preset-mantine": "^1.17.0",
+        "postcss-simple-vars": "^7.0.1",
+        "react": "^18.3.1",
+        "rollup": "^4.18.1",
+        "rollup-plugin-dts": "^6.1.1",
+        "rollup-plugin-peer-deps-external": "^2.2.4",
+        "rollup-plugin-postcss": "^4.0.2",
+        "tailwindcss": "^3.4.10",
+        "tslib": "^2.6.3",
+        "typescript": "^5.5.3"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome-svg-core": "^6.6.0",
+        "@fortawesome/free-solid-svg-icons": "^6.6.0",
+        "@fortawesome/react-fontawesome": "^0.2.2",
+        "@mantine/core": "^7.12.1",
+        "@mantine/dates": "^7.12.2",
+        "@mantine/form": "^7.12.2",
+        "@mantine/hooks": "^7.12.1",
+        "@tabler/icons-react": "^3.14.0",
+        "@types/uuid": "^10.0.0",
+        "axios": "^1.7.5",
+        "dompurify": "^3.1.6",
+        "moment": "^2.30.1",
+        "uuid": "^10.0.0"
+    }
+}
