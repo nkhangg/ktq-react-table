@@ -6,6 +6,8 @@ export const flowShort: TShort[] = ['desc', 'asc'];
 export const defaultKeyPerpage = 'per_page';
 export const defaultKeyPage = 'page';
 
+export const defaultStyleHightlight = { color: 'red', backgroundColor: 'yellow' } as React.CSSProperties;
+
 export const defaultPerpageValue = '10';
 
 export const getParamsData = <R extends Record<string, string | number>>(options: { prefixShort?: string; columns: IColumn<R>[] }) => {

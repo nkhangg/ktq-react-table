@@ -1,4 +1,4 @@
-import { Box, Button, Tooltip } from '@mantine/core';
+import { Box, Button, Modal, Tooltip } from '@mantine/core';
 import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
 import Table from './components/table';
@@ -6,6 +6,7 @@ import { IColumn, TRefTableFn } from './type';
 import { getParamsData } from './ultils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit } from '@fortawesome/free-solid-svg-icons';
+import { useDisclosure } from '@mantine/hooks';
 
 type Root = {
     id: number;
@@ -44,7 +45,8 @@ const columns: IColumn<Root>[] = [
     {
         key: 'order_id',
         title: 'ID',
-        renderRow: (row) => {
+        renderRow: (row, data) => {
+            console.log('data', data);
             return <Box style={{ color: 'red' }}>{row.id}</Box>;
         },
         renderColumn(col) {
@@ -89,6 +91,8 @@ const columns: IColumn<Root>[] = [
 
 const App = () => {
     const [data, setData] = useState<{ data: Root[]; [key: string]: any }>({ data: [] });
+    const [opened, { open, close }] = useDisclosure(false);
+
     const [loading, setLoading] = useState(false);
 
     const [header, setHeader] = useState({
@@ -167,6 +171,16 @@ const App = () => {
             id: '3',
             name: 'Khang',
         },
+        {
+            age: 20,
+            id: '4',
+            name: 'Khang',
+        },
+        {
+            age: 20,
+            id: '5',
+            name: 'Khang',
+        },
     ];
 
     return (
@@ -185,7 +199,7 @@ const App = () => {
                 >
                     <Table
                         options={{
-                            // query: getDataTable,
+                            query: getDataTable,
                             pathToData: 'data.data',
                             perPage: data['per_page'],
                             lastPage: data['last_page'],
@@ -200,11 +214,18 @@ const App = () => {
                                 per_page: 'perPage',
                             },
                         }}
+                        hightlightResult={{
+                            show: true,
+                            style: {
+                                color: 'blue',
+                                backgroundColor: 'red',
+                            },
+                        }}
                         tableChildProps={{ th: { style: { textAlign: 'center' } } }}
                         withColumnBorders
                         withTableBorder
-                        columns={userColumns}
-                        rows={rows}
+                        columns={columns}
+                        // rows={rows}
                         onFilter={(data) => {
                             console.log(data);
                         }}
@@ -223,17 +244,20 @@ const App = () => {
                                 return (
                                     <Box>
                                         <Tooltip label={row.id}>
-                                            <FontAwesomeIcon color="blue" icon={faEdit} />
+                                            <FontAwesomeIcon onClick={open} color="blue" icon={faEdit} />
                                         </Tooltip>
                                     </Box>
                                 );
                             },
                         }}
-                        autoCallWithParams={false}
                         rowKey="id"
                     />
                 </Box>
             </Box>
+
+            <Modal opened={opened} onClose={close} withCloseButton={false}>
+                Modal without header, press escape or click on overlay to close
+            </Modal>
         </Box>
     );
 };

@@ -36,7 +36,7 @@ export interface IColumnStyle {
 export type IColumn<R extends Record<string, string | number>> = {
     key: Extract<keyof R, string>;
     title: string;
-    renderRow?: (row: R) => ReactNode;
+    renderRow?: (row: R, higtlightData?: IDataFilter) => ReactNode;
     renderColumn?: (col: Omit<IColumn<R>, 'renderRow' | 'renderColumn'>) => ReactNode;
     style?: IColumnStyle;
     typeFilter?: TTypeFilter;
