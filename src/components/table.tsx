@@ -1,19 +1,20 @@
 'use client';
 
-import '@mantine/core/styles.css';
-import '@mantine/dates/styles.css';
-import '../index.css';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { faArrowDownAZ, faArrowsUpDown, faArrowUpAZ } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Box, MantineStyleProp, Table as MTable, TableProps as MTableProps, Tooltip } from '@mantine/core';
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
 import { AxiosError, AxiosResponse } from 'axios';
-import React, { ReactNode, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useState } from 'react';
-import { IColumn, IColumnStyle, IDataFilter, IFilterItemProps, IOptions, ITableFilter, ITableShort, TableChildProps, TKeyPagiantion, TRefTableFn, TShort } from '../type';
-import { defaultPathToData, defaultPrefixShort, flowShort, getParamsData as getParamsFromURL } from '../ultils';
+import DOMPurify from 'dompurify';
+import React, { ReactNode, useCallback, useEffect, useImperativeHandle, useState } from 'react';
+import '../index.css';
+import { IColumn, IColumnStyle, IDataFilter, IFilterItemProps, IOptions, ITableFilter, ITableShort, TableChildProps, TKeyPagiantion, TRefTableFn } from '../type';
+import { defaultPathToData, defaultPrefixShort, defaultStyleHightlight, flowShort, getParamsData as getParamsFromURL } from '../ultils';
 import Filter from './filter';
 
-interface TableProps<R extends Record<string, string | number>> extends MTableProps {
+export interface TableProps<R extends Record<string, string | number>> extends MTableProps {
     columns: IColumn<R>[];
     rows?: R[];
     rowKey: Extract<keyof R, string>;
@@ -28,10 +29,13 @@ interface TableProps<R extends Record<string, string | number>> extends MTablePr
     persistFilter?: IDataFilter[];
     showLoading?: boolean;
     addToHistoryBrowserWhenFillter?: boolean;
-    autoCallWithParams?: boolean;
     showFilter?: boolean;
     refTableFn?: TRefTableFn<R>;
     filterProps?: IFilterItemProps<R>;
+    hightlightResult?: {
+        show?: boolean;
+        style?: React.CSSProperties;
+    };
     actions?: {
         title?: string | ReactNode;
         body: (row: R) => ReactNode;
@@ -71,12 +75,12 @@ const Table = <R extends Record<string, string | number>>({
     loadingTemplate,
     showLoading,
     addToHistoryBrowserWhenFillter,
-    autoCallWithParams = true,
     showFilter = true,
     refTableFn,
     filterProps,
     persistFilter,
     actions,
+    hightlightResult = { show: true, style: defaultStyleHightlight },
     onShort,
     onAfterFetch,
     onFetched,
@@ -177,8 +181,6 @@ const Table = <R extends Record<string, string | number>>({
 
             const { params } = renderFilter(shortData, filter);
 
-            console.log('params', params);
-
             try {
                 if (onAfterFetch) onAfterFetch();
 
@@ -238,7 +240,6 @@ const Table = <R extends Record<string, string | number>>({
                 if (loading) return;
 
                 if (!short) {
-                    console.log('1');
                     fetchWithShort({ key: col.key, type: flowShort[0] });
 
                     if (onShort) onShort({ key: col.key, type: flowShort[0] });
@@ -247,7 +248,6 @@ const Table = <R extends Record<string, string | number>>({
                 }
 
                 if (short.type === 'desc') {
-                    console.log('2');
                     fetchWithShort({ key: col.key, type: flowShort[1] });
                     if (onShort) onShort({ key: col.key, type: flowShort[1] });
 
@@ -255,7 +255,6 @@ const Table = <R extends Record<string, string | number>>({
                 }
 
                 if (short.type === 'asc') {
-                    console.log('3');
                     fetchWithShort(null);
                     if (onShort) onShort(null);
 
@@ -370,8 +369,6 @@ const Table = <R extends Record<string, string | number>>({
                 params[filter.key] = String(filter.type);
             });
 
-            console.log(dataFilter);
-
             renderParamsUrl(dataFilter);
 
             return {
@@ -383,29 +380,52 @@ const Table = <R extends Record<string, string | number>>({
         [filter, options?.prefixShort, paramsUrl],
     );
 
-    const getParamsData = (paramObject: { [key: string]: string | number }) => {
-        const prefixShort = options?.prefixShort || defaultPrefixShort;
-
-        const pramsKeys = Object.keys(paramObject);
-
-        if (pramsKeys.length <= 0)
-            return {
-                shortParamsData: [],
-                filterParamsData: [],
-            };
-
-        const shortParamsData = pramsKeys
-            .filter((item) => item.includes(prefixShort) && columns.map((col) => col.key).includes(item.replace(prefixShort, '') as IColumn<R>['key']))
-            .map((i) => {
-                return { key: i.replace(prefixShort, ''), type: flowShort.includes(paramObject[i] as TShort) ? paramObject[i] : 'asc' } as ITableShort<R>;
-            });
-
-        const filterParamsData = pramsKeys
-            // .filter((item) => columns.map((col) => col.key).includes(item as IColumn<R>['key']))
-            .map((item) => ({ key: item, type: paramObject[item] } as ITableFilter<R>));
-
-        return { shortParamsData, filterParamsData };
+    const styleToString = (style: React.CSSProperties) => {
+        return Object.keys(style).reduce(
+            (acc, key) =>
+                ((acc +
+                    key
+                        .split(/(?=[A-Z])/)
+                        .join('-')
+                        .toLowerCase() +
+                    ':' +
+                    style[key as keyof React.CSSProperties]) as string) + ';',
+            '',
+        );
     };
+
+    const renderRow = useCallback(
+        (row: R, col: IColumn<R>) => {
+            if (!hightlightResult.show) {
+                if (col.renderRow) return col.renderRow(row);
+
+                return row[col.key];
+            }
+
+            const item = filter.find((key) => key.key === col.key);
+
+            if (item) {
+                if (col.renderRow) return col.renderRow(row, item as IDataFilter);
+
+                return (
+                    <div
+                        dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(
+                                String(row[col.key]).replace(
+                                    String(item.type),
+                                    `<span style="${styleToString(hightlightResult.style || defaultStyleHightlight)}">${item.type}</span>`,
+                                ),
+                            ),
+                        }}
+                    ></div>
+                );
+            }
+
+            return col.renderRow ? col.renderRow(row) : row[col.key];
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [filter],
+    );
 
     // use effect space
     useEffect(() => {
@@ -426,27 +446,6 @@ const Table = <R extends Record<string, string | number>>({
     useEffect(() => {
         setLoading(showLoading || false);
     }, [showLoading]);
-
-    useLayoutEffect(() => {
-        if (!paramsUrl.size) return;
-
-        const paramObject: { [key: string]: string | number } = {};
-        paramsUrl.forEach((value, key) => {
-            paramObject[key] = value;
-        });
-
-        const { filterParamsData, shortParamsData } = getParamsData(paramObject);
-
-        if (shortParamsData.length > 0 || filterParamsData.length > 0) {
-            setShort(shortParamsData[0]);
-            setFilter(filterParamsData);
-            if (autoCallWithParams) {
-                fetchData(shortParamsData[0], filterParamsData);
-            }
-        }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     useEffect(() => {
         if (!options) return;
@@ -487,9 +486,8 @@ const Table = <R extends Record<string, string | number>>({
             setShort(shortParamsData as ITableShort<R>);
         }
 
-        console.log(shortParamsData);
-
         fetchData((shortParamsData as ITableShort<R>) || null, filterParamsData);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [options]);
 
     return (
@@ -529,9 +527,6 @@ const Table = <R extends Record<string, string | number>>({
 
                         {actions && (
                             <MTable.Th {...th} key={'__action_head_' + columns.length + 1}>
-                                {/* <Box style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                    
-                                </Box> */}
                                 {actions.title ? actions.title : 'Action'}
                             </MTable.Th>
                         )}
@@ -543,7 +538,9 @@ const Table = <R extends Record<string, string | number>>({
                             <MTable.Tr {...trbody} key={row[rowKey]}>
                                 {columns.map((col) => (
                                     <MTable.Td key={col.key} {...td}>
-                                        {col.renderRow ? col.renderRow(row) : row[col.key]}
+                                        {/* {col.renderRow ? col.renderRow(row) : row[col.key]} */}
+
+                                        {renderRow(row, col)}
                                     </MTable.Td>
                                 ))}
 
