@@ -378,3 +378,71 @@ In summary, `keyOptions` helps the table know how to extract and display paginat
                 },
         }}
     ```
+
+
+## `Fix recall api when open modal`
+- **Example**:
+  ```tsx
+  const getDataTable = useCallback((params: Record<string, string | number>) => {
+        return axios({
+            url: 'http://example.com/api',
+            params,
+        });
+    }, []);
+
+    const memoizedTable = useMemo(
+        () => (
+            <Table
+                options={{
+                    query: getDataTable,
+                    pathToData: 'data.data',
+
+                    keyOptions: {
+                        to: 'to',
+                        from: 'from',
+                        total: 'total',
+                        last_page: 'lastPage',
+                        per_page: 'perPage',
+                    },
+                }}
+                hightlightResult={{
+                    show: true,
+                    style: {
+                        color: 'blue',
+                        backgroundColor: 'red',
+                    },
+                }}
+                tableChildProps={{ th: { style: { textAlign: 'center' } } }}
+                withColumnBorders
+                withTableBorder
+                columns={columns}
+                onFilter={(data) => {
+                    console.log(data);
+                }}
+                onShort={(data) => {
+                    console.log(data);
+                }}
+                persistFilter={[
+                    {
+                        key: 'time_zone',
+                        type: 'Asian',
+                    },
+                ]}
+                actions={{
+                    title: <span>Action</span>,
+                    body(row) {
+                        return (
+                            <Box>
+                                <Tooltip label={row.id}>
+                                    <FontAwesomeIcon onClick={open} color="blue" icon={faEdit} />
+                                </Tooltip>
+                            </Box>
+                        );
+                    },
+                }}
+                rowKey="id"
+            />
+        ),
+        [getDataTable],
+    ); Wrap the component with `useMemo`, and use it in the place where you want to optimize rendering.
+    ```
