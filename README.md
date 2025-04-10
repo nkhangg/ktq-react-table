@@ -1,5 +1,7 @@
 # Table of Contents
 
+**_warning: Not optimized on nextjs_**
+
 - Features
 - Installation
 - Import
